@@ -109,7 +109,7 @@ The position of a commitment in the Merkle tree. Used to construct Merkle proofs
 ### Merkle Tree
 A tree data structure where each non-leaf node is a hash of its children. torx402 uses Merkle trees to efficiently prove that a commitment exists in the deposit set.
 
-**Properties**: Height 20, supports up to 2^20 (~1M) deposits per pool.
+**Properties**: Height 32, supports up to 2^32 (~4.3B) deposits per pool.
 
 ### Merkle Root
 The top hash of a Merkle tree, representing the entire tree state. torx402 stores the last 100 roots to allow flexible proof timing.
@@ -172,7 +172,7 @@ A third-party service that submits withdrawal transactions on behalf of users. E
 An attack where a valid proof is reused. Prevented by nullifier hash uniqueness and time-bound authorizations.
 
 ### Root History
-An array of the last 100 Merkle roots stored in the privacy pool contract. Allows users to generate proofs against recent roots even as new deposits are added.
+An array of the last 30 Merkle roots stored in the privacy pool contract. Allows users to generate proofs against recent roots even as new deposits are added.
 
 ## S
 

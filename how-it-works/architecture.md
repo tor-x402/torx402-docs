@@ -153,12 +153,14 @@ WITHDRAWAL/PAYMENT:
 
 **Data Structures**:
 ```solidity
-// Merkle tree of commitments
+// Merkle tree of commitments (height 32)
 mapping(uint256 => bytes32) public commitments;
 uint256 public nextLeafIndex;
+uint32 public constant TREE_HEIGHT = 32;  // Supports 4.3B deposits
 
-// Historical roots for proof flexibility
-bytes32[1000] public roots;
+// Historical roots for proof flexibility (10,000 roots)
+bytes32[10000] public roots;
+mapping(bytes32 => bool) private rootSet;  // O(1) lookup optimization
 uint256 public currentRootIndex;
 
 // Nullifier tracking (prevent double-spend)
@@ -289,15 +291,21 @@ Revenue Model:
 
 **On-Chain Components**:
 ```
-EVM:
-  - Privacy Pool Contracts (per denomination)
-  - EIP-3009 Token Contracts (USDC, etc.)
+EVM (Layer 2s - Base, Arbitrum, Optimism):
+  - Privacy Pool Contracts (per denomination, height 32 Merkle tree)
+  - Verifier Contracts (Groth16 verification, optimized for L2 gas)
+  - Token Contracts (ETH, USDC, etc.)
+
+BSC (Binance Smart Chain):
+  - Privacy Pool Contracts (height 32 Merkle tree)
   - Verifier Contracts (Groth16 verification)
+  - BEP-20 Token Contracts
 
 Solana:
-  - Privacy Pool Programs
+  - Privacy Pool Programs (height 32 Merkle tree)
   - SPL Token Accounts
   - Program-derived Addresses (PDAs)
+  - Optimized for Solana compute units
 ```
 
 ## Component Interaction Flow
@@ -432,16 +440,17 @@ Each pool maintains a Merkle tree of commitments:
              /    \   /    \  \   \  /    \
            C0    C1 C2    C3 C4  C5 C6   C7 ...
 
-Height: 20 (supports 2^20 = ~1M deposits per pool)
+Height: 32 (supports 2^32 = 4.3 billion deposits per pool)
 Hash Function: MiMC (zk-SNARK friendly)
 Leaf Values: Commitments C = H1(k||r)
 ```
 
 **Why Merkle Trees?**:
-- Efficient proof of membership (log N proof size)
-- zk-SNARK friendly (MiMC hash)
-- Supports incremental updates
-- Historical roots enable flexible proof timing
+- Efficient proof of membership (log N proof size - 32 hashes for height 32)
+- zk-SNARK friendly (MiMC hash optimized for circuits)
+- Supports incremental updates (add leaves left-to-right)
+- Historical roots enable flexible proof timing (10,000 root buffer)
+- Proven design (Tornado Cash uses same height 32 structure)
 
 ## Security Architecture
 
@@ -541,11 +550,13 @@ On-Chain:
 
 1. **Multi-Asset Support**: Privacy pools for different tokens (USDC, DAI, USDT)
 2. **Cross-Chain Bridges**: Deposit on Chain A, withdraw on Chain B
-3. **Trusted Setup Ceremony**: Community-driven parameter generation
+3. **Trusted Setup Ceremony**: Community-driven parameter generation for circuits
 4. **Recursive Proofs**: Smaller proof sizes, faster verification
 5. **Mobile SDKs**: Native iOS/Android support
 6. **Browser Extensions**: One-click anonymous payments
 7. **Compliance Layer**: Optional identity disclosure for regulated entities
+8. **Dynamic Root History**: Scale from 10k to 100k roots if volume exceeds projections
+9. **Pool Sharding**: Multiple pools per denomination for extreme volume (1M+ deposits/hour)
 
 ## Next Steps
 

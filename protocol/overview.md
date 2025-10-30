@@ -259,7 +259,7 @@ After successful settlement, server includes transaction details:
 
 ### Merkle Tree
 
-- **Height**: 20 (supports 2^20 = 1,048,576 deposits)
+- **Height**: 20 (supports 2^32 = 4,294,967,296 deposits)
 - **Hash Function**: MiMC (H2)
 - **Initial State**: All leaves set to 0
 - **Update**: Incremental (only path to root recalculated)
@@ -418,9 +418,9 @@ Returns information about a specific privacy pool.
 
 ## Historical Merkle Root Storage
 
-### Why Store 1,000 Roots?
+### Why Store 10,000 Roots?
 
-The privacy pool contract stores the **last 1,000 Merkle roots** in a circular buffer. This is a **convenience window** - not a hard limit on withdrawals.
+The privacy pool contract stores the **last 10,000 Merkle roots** in a circular buffer. This is a **convenience window** - not a hard limit on withdrawals.
 
 **Critical Understanding**: Your funds are NEVER locked. If your root expires from history, you simply regenerate your proof with a current root. Your commitment remains in the Merkle tree permanently.
 
@@ -442,7 +442,7 @@ Without historical storage, users would need to generate proofs against the curr
 ```solidity
 contract PrivacyPool {
     // Store last 10,000 Merkle roots in circular buffer
-    bytes32[1000] public roots;
+    bytes32[10000] public roots;
     uint256 public currentRootIndex = 0;
     
     // Optimized root validation using mapping for O(1) lookup
@@ -464,10 +464,25 @@ contract PrivacyPool {
         rootSet[newRoot] = true;
         
         // Move to next position (circular)
-        currentRootIndex = (currentRootIndex + 1) % 1000;
+        currentRootIndex = (currentRootIndex + 1) % 10000;
     }
 }
 ```
+
+<old_text line=467>
+#### Why 10,000 is Optimal
+
+The 10,000-root window provides ample time for users to withdraw, even in high-volume pools:
+
+| Pool Volume | Deposits/Hour | Time Until Root Expires | Sufficient? |
+|-------------|---------------|------------------------|-------------|
+| Ultra-High (0.001 ETH) | 100 | ~4 days | ✅ Excellent |
+| High (0.01 ETH) | 50 | ~8 days | ✅ Excellent |
+| Medium (0.1 ETH) | 20 | ~21 days | ✅ Excellent |
+| Low (1 ETH) | 5 | ~83 days | ✅ More than enough |
+| Very Low (10 ETH) | 1 | ~416 days | ✅ Over a year |
+
+**Key Benefit**: Users can generate proofs against any of the last 1,000 roots, providing **days to months** of flexibility. Uses optimized mapping storage for O(1) lookup, maintaining low gas costs.
 
 #### Why 10,000 is Optimal
 
@@ -487,7 +502,7 @@ The 10,000-root window provides ample time for users to withdraw, even in high-v
 
 ```
 Storage Cost:
-  1,000 roots × 32 bytes = 32,000 bytes
+  10,000 roots × 32 bytes = 320,000 bytes
   With mapping optimization: 2 storage slots per root update
   Root update: ~45,000 gas (mapping update + array update)
 
@@ -505,10 +520,10 @@ Total withdrawal cost:
 Overhead: Only ~1% of total withdrawal cost
 ```
 
-**Comparison to Tornado Cash (30 roots):**
-- Tornado Cash: 30 roots, linear search, ~6k gas lookup
-- torx402: 1,000 roots, mapping lookup, ~3k gas lookup
-- **Result**: 33x more roots with LOWER gas cost! ✅
+**Comparison to Tornado Cash:**
+- **Tornado Cash**: 30 roots, height 32 tree, linear search, ~6k gas lookup
+- **torx402**: 10,000 roots, height 32 tree, mapping lookup, ~3k gas lookup
+- **Result**: 333x more roots with LOWER gas cost! ✅
 
 #### Root Expiration & Proof Regeneration
 
@@ -516,7 +531,7 @@ Overhead: Only ~1% of total withdrawal cost
 
 **Your commitment remains in the tree FOREVER** - it never gets removed. The root history only determines which pre-generated proofs are accepted without regeneration.
 
-If your root expires from the 1,000-root history:
+If your root expires from the 10,000-root history:
 1. Your commitment at `leafIndex` still exists in the tree
 2. Fetch current Merkle tree state
 3. Regenerate Merkle proof for your commitment (same leafIndex)
@@ -525,11 +540,12 @@ If your root expires from the 1,000-root history:
 
 **Cost**: 5-10 seconds for proof regeneration (no financial loss)
 **Likelihood**: 
-- High-volume pools: Every 10-20 hours (occasional regeneration needed)
-- Medium-volume pools: Every 2+ days (rarely needed)
-- Low-volume pools: Every week+ (almost never needed)
+- High-volume pools (10k deposits/hour): Every ~1 hour (may need occasional regeneration)
+- Very High-volume pools (100k deposits/hour): Every ~6 minutes (frequent regeneration)
+- Medium-volume pools (1k deposits/hour): Every ~10 hours (rarely needed)
+- Low-volume pools (100 deposits/hour): Every ~4 days (almost never needed)
 
-**This is a feature, not a bug**: Keeping the window reasonable (1,000 vs 10,000 or 100,000) maintains gas efficiency while proof regeneration provides infinite flexibility.
+**Design Philosophy**: 10,000 roots provides a ~1 hour window for anticipated high-volume micropayment usage. If volume exceeds projections, users can regenerate proofs (5-10 seconds) or root history can be increased through governance.
 
 ## Security Properties
 

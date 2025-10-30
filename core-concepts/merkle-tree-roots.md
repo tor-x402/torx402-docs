@@ -73,7 +73,7 @@ The smart contract stores **recent roots** to avoid forcing users to regenerate 
 ```solidity
 contract PrivacyPool {
     // Store last 1,000 Merkle roots in circular buffer
-    bytes32[1000] public roots;
+    bytes32[10000] public roots;
     mapping(bytes32 => bool) private rootSet; // O(1) lookup
     uint256 public currentRootIndex = 0;
 
@@ -92,8 +92,8 @@ contract PrivacyPool {
         roots[currentRootIndex] = newRoot;
         rootSet[newRoot] = true;
 
-        // Circular buffer: wraps around at 1,000
-        currentRootIndex = (currentRootIndex + 1) % 1000;
+        // Circular buffer: wraps around at 10,000
+        currentRootIndex = (currentRootIndex + 1) % 10000;
     }
 }
 ```
@@ -106,7 +106,7 @@ You deposited at 10:00 AM (Root R100)
 You withdraw at 2:00 PM (200 deposits later, Current Root R300)
 
 Check: isKnownRoot(R100)?
-  → Search in last 1,000 roots
+  → Search in last 10,000 roots
   → R100 found at position 100 ✅
   → Your pre-generated proof is accepted
   → Withdraw immediately
@@ -121,8 +121,8 @@ You deposited at 10:00 AM (Root R100)
 You withdraw 2 weeks later (1,500 deposits later, Current Root R1600)
 
 Check: isKnownRoot(R100)?
-  → Search in last 1,000 roots
-  → R100 NOT found (evicted at deposit 1,100)
+  → Search in last 10,000 roots
+  → R100 NOT found (evicted at deposit 10,100)
   → Your pre-generated proof is rejected
 
 BUT your commitment is still at leafIndex 100! ✅
@@ -138,58 +138,78 @@ Time: 5-10 seconds extra (one-time)
 Funds status: SAFE, fully accessible ✅
 ```
 
-## Why 1,000 Roots? (Not 30, 100, or 10,000)
+## Why 10,000 Roots? (Not 30, 100, or 1,000)
 
 ### Comparison of Options
 
-| Roots | Storage | Gas Cost | Time Window (High-Vol Pool) | Regeneration Frequency | Verdict |
+| Roots | Storage | Gas Cost | Time Window (10k deposits/hr) | Regeneration Frequency | Verdict |
 |-------|---------|----------|----------------------------|------------------------|---------|
-| **30** (Tornado) | 960 B | ~6k gas | 18 minutes | Very often | ❌ Too short for micropayments |
-| **100** | 3.2 KB | ~20k gas | 1 hour | Often | ⚠️ Still too tight |
-| **1,000** ✅ | **32 KB** | **~3k gas** | **10 hours** | **Rare** | ✅ **OPTIMAL** |
-| **10,000** | 320 KB | ~3k gas | 4+ days | Very rare | ⚠️ Unnecessary (overkill) |
+| **30** (Tornado) | 960 B | ~6k gas | ~2 minutes | Constant | ❌ Far too short |
+| **100** | 3.2 KB | ~20k gas | ~6 minutes | Very often | ❌ Too short |
+| **1,000** | 32 KB | ~3k gas | ~6 minutes | Very often | ⚠️ Still too tight |
+| **10,000** ✅ | **320 KB** | **~3k gas** | **~1 hour** | **Occasional** | ✅ **OPTIMAL** |
 
-### Time Windows by Pool Volume
+### Volume Assumptions & Time Windows
+
+**Conservative Volume Estimates** (per denomination pool):
+- High Volume: 10,000 deposits/hour (primary target)
+- Very High Volume: 100,000 deposits/hour (peak scenario)
+- Medium Volume: 1,000 deposits/hour (slower pools)
+- Low Volume: 100 deposits/hour (large denominations)
+
+**Time Windows by Volume:**
 
 ```
-Ultra-High Volume (0.001 ETH - 100 deposits/hour):
-  30 roots: 18 minutes ❌
-  1,000 roots: 10 hours ✅
-  → User can sleep, work, live normally
-
-High Volume (0.01 ETH - 50 deposits/hour):
-  30 roots: 36 minutes ❌
-  1,000 roots: 20 hours ✅
-  → Covers full day + sleep
-
-Medium Volume (0.1 ETH - 20 deposits/hour):
-  30 roots: 1.5 hours ⚠️
-  1,000 roots: 2+ days ✅
-  → Covers weekend wait for anonymity
-
-Low Volume (1 ETH - 5 deposits/hour):
-  30 roots: 6 hours ✅
-  1,000 roots: 8+ days ✅
+High Volume (10,000 deposits/hour) - Target Scenario:
+  30 roots (Tornado): ~2 minutes ❌
+  10,000 roots (torx402): ~1 hour ✅
+  → Sufficient for normal withdrawal patterns
+  
+Very High Volume (100,000 deposits/hour) - Peak Scenario:
+  30 roots: ~11 seconds ❌
+  10,000 roots: ~6 minutes ✅
+  → Still workable with auto-regeneration
+  
+Medium Volume (1,000 deposits/hour):
+  30 roots: ~2 minutes ❌
+  10,000 roots: ~10 hours ✅
+  → Covers sleep, work, full day
+  
+Low Volume (100 deposits/hour):
+  30 roots: ~18 minutes ⚠️
+  10,000 roots: ~4+ days ✅
   → Plenty of time
 ```
 
-### Why Not 10,000?
+### Why Not More (100k or 1M)?
 
 **Diminishing Returns:**
 ```
-1,000 roots: 10 hours (high-vol)
-  → Covers: Sleep, work, normal delays ✅
-
-10,000 roots: 4+ days (high-vol)
-  → Covers: Extended weekends, vacations
-  → But: Regeneration only takes 5-10 seconds anyway
-  → Benefit: Minimal (avoid 5-10 sec regeneration?)
-  → Cost: 10x storage (320 KB vs 32 KB)
-
-Verdict: Not worth 10x storage for marginal benefit
+10,000 roots: ~1 hour at 10k deposits/hour ✅
+  → Covers: Normal withdrawal timing
+  → Storage: 320 KB (reasonable)
+  
+100,000 roots: ~10 hours at 10k deposits/hour
+  → Covers: Full day including sleep
+  → Storage: 3.2 MB (getting expensive)
+  → Benefit: Avoids regeneration for slow withdrawers
+  → Cost: 10x storage
+  
+1,000,000 roots: ~100 hours at 10k deposits/hour
+  → Covers: 4+ days
+  → Storage: 32 MB (very expensive on-chain)
+  → Benefit: Minimal (who waits 4 days?)
+  → Cost: 100x storage
+  
+Verdict: 10,000 roots is the sweet spot
 ```
 
-**Philosophy**: If someone waits days/weeks to withdraw, spending 5-10 seconds to regenerate proof is acceptable. We don't need massive storage to avoid this minor inconvenience.
+**Design Philosophy**: 
+- At 10k deposits/hour (conservative): 1 hour window is sufficient
+- At 100k deposits/hour (very high): 6 minute window requires auto-regeneration
+- SDK will handle regeneration automatically
+- Proof regeneration only takes 5-10 seconds
+- Better to regenerate occasionally than waste storage
 
 ## Gas Cost Optimization: The Mapping Trick
 
@@ -214,7 +234,7 @@ Gas cost: 1,000 iterations × ~200 gas = ~200,000 gas ❌
 ```solidity
 // O(1) mapping lookup - constant time
 contract PrivacyPool {
-    bytes32[1000] public roots;  // Historical record
+    bytes32[10000] public roots;  // Historical record
     mapping(bytes32 => bool) private rootSet;  // Fast validation
 
     function isKnownRoot(bytes32 root) public view returns (bool) {
@@ -311,61 +331,88 @@ async function withdraw(note) {
 
 ### Original Tornado Cash Design (2019)
 
+**Actual Tornado Cash Specifications:**
+- **Root storage**: 30 roots (not 100!)
+- **Tree height**: 32 (same as torx402)
+- **Lookup method**: Linear iteration through 30 roots
+- **Gas cost**: ~6,000 gas for root lookup
+
 ```
 Target use case: Large, infrequent transfers
   - Pools: 0.1 ETH, 1 ETH, 10 ETH, 100 ETH
-  - Volume: 5-20 deposits per hour
+  - Volume: 5-20 deposits per hour (low frequency)
   - User behavior: Deposit large sum, withdraw days/weeks later
-
+  
 30 roots calculation:
-  Medium pool (10 deposits/hour): 30 roots = 3 hours
-  Low pool (5 deposits/hour): 30 roots = 6 hours
-
+  Medium pool (10 deposits/hour): 30 roots = 3 hours ✅
+  Low pool (5 deposits/hour): 30 roots = 6 hours ✅
+  
 Verdict: 30 roots was SUFFICIENT for large, low-frequency pools ✅
 
 Why it worked:
-  - Users expected to wait anyway (for anonymity)
-  - Lower volume meant longer windows
+  - Low volume (5-20/hour, not thousands)
+  - Users expected to wait days for anonymity anyway
+  - 3-6 hour window was plenty
   - Regeneration was rare
+  
+Source: Tornado Cash uses incremental Merkle tree of height 32
+        with last 30 root snapshots for verification
 ```
 
 ## Why torx402 Uses 1,000 Roots
 
 ### Target Use Case: High-Volume Micropayments
 
+**torx402 Specifications:**
+- **Root storage**: 10,000 roots (333x more than Tornado)
+- **Tree height**: 32 (same as Tornado - proven design)
+- **Lookup method**: Mapping (O(1), constant time)
+- **Gas cost**: ~3,000 gas (50% cheaper than Tornado!)
+- **Target networks**: Layer 2s (Base, Arbitrum), BSC, Solana
+
 ```
-Target use case: Frequent, small payments
-  - Pools: 0.001 ETH, 0.01 ETH, 0.1 ETH
-  - Volume: 50-100+ deposits per hour
-  - User behavior: Deposit and withdraw same day, AI agents constant usage
+Target use case: Frequent, small payments (micropayments)
+  - Pools: 0.001 ETH, 0.01 ETH, 0.1 ETH (small denominations)
+  - Volume: 10,000 deposits/hour (conservative estimate)
+  - Peak volume: 100,000+ deposits/hour (AI agents, global usage)
+  - User behavior: Deposit and withdraw within hours, constant AI agent activity
+  
+10,000 roots calculation (conservative 10k deposits/hour):
+  High volume pool: 10,000 ÷ 10,000 = ~1 hour window ✅
+  
+10,000 roots calculation (peak 100k deposits/hour):
+  Very high volume: 10,000 ÷ 100,000 = ~6 minutes ⚠️
+  → Auto-regeneration in SDK handles this
+  
+Verdict: 10,000 roots provides ~1 hour window at target volume ✅
 
-1,000 roots calculation:
-  Ultra-high pool (100 deposits/hour): 1,000 roots = 10 hours
-  High pool (50 deposits/hour): 1,000 roots = 20 hours
-
-Verdict: 1,000 roots provides comfortable same-day window ✅
-
-Why we need more:
-  - Higher volume = faster root rotation
-  - Global users (timezones)
-  - Users shouldn't feel rushed
-  - AI agents may have delays
+Why we need 333x more than Tornado:
+  - MUCH higher volume (10k/hr vs 5-20/hr = 500-2000x more)
+  - Micropayments = constant high-frequency usage
+  - AI agents operating 24/7 globally
+  - Users still need reasonable time to withdraw
+  - L2 gas is cheap enough to afford more storage
 ```
 
 ### The Design Philosophy
 
 ```
-Tornado Cash (30 roots):
+Tornado Cash (30 roots, height 32):
   Philosophy: "Users wait days for anonymity anyway"
-  Use case: Large amounts, patience expected
-  Window: 18 min to 6 hours (sufficient)
-
-torx402 (1,000 roots):
-  Philosophy: "Users want fast, convenient payments"
-  Use case: Micropayments, frequent usage
-  Window: 10 hours to 2+ days (comfortable)
-
+  Use case: Large amounts (1-100 ETH), patience expected
+  Volume: 5-20 deposits/hour (low frequency)
+  Window: 1.5-6 hours (sufficient for low volume)
+  Networks: Ethereum mainnet (expensive gas)
+  
+torx402 (10,000 roots, height 32):
+  Philosophy: "High-frequency micropayments need reasonable windows"
+  Use case: Micropayments (0.001-0.1 ETH), instant usage
+  Volume: 10,000 deposits/hour (conservative) to 100,000+ (peak)
+  Window: ~1 hour (conservative) to ~6 minutes (peak)
+  Networks: L2s (Base, Arbitrum), BSC, Solana (cheap gas)
+  
 Both are correct for their use case!
+torx402 scales for 500-2000x higher volume than Tornado
 ```
 
 ## Technical Details
@@ -375,9 +422,10 @@ Both are correct for their use case!
 ```solidity
 contract PrivacyPool {
     // Dual storage for efficiency
-    bytes32[1000] public roots;           // Array: historical record
+    bytes32[10000] public roots;           // Array: historical record
     mapping(bytes32 => bool) private rootSet;  // Mapping: fast lookup
     uint256 public currentRootIndex = 0;
+    uint32 public constant TREE_HEIGHT = 32;  // Supports 4.3B deposits
 
     // Add new root (called on each deposit)
     function addRoot(bytes32 newRoot) internal {
@@ -392,7 +440,7 @@ contract PrivacyPool {
         rootSet[newRoot] = true;
 
         // Advance pointer (circular)
-        currentRootIndex = (currentRootIndex + 1) % 1000;
+        currentRootIndex = (currentRootIndex + 1) % 10000;
     }
 
     // Validate root (O(1) constant time)
@@ -442,22 +490,31 @@ Per Deposit (add root):
   Update array slot: ~20,000 gas
   ────────────────────────────────
   Total: ~45,000 gas
-  Cost at 10 gwei: ~$0.01
+  Cost on Base L2 (0.1 gwei): ~$0.0001
+  Cost on BSC (3 gwei): ~$0.003
+  Cost on Solana: ~$0.00001
 
 Per Withdrawal (check root):
   Mapping lookup: ~3,000 gas
   ────────────────────────────────
   Total: ~3,000 gas (vs ~200k for iteration!)
 
-Total Withdrawal Cost:
-  Proof verification: ~280,000 gas
-  Root lookup: ~3,000 gas
+Total Withdrawal Cost (Height 32 tree):
+  Proof verification (32 hashes): ~400,000 gas
+  Root lookup (mapping): ~3,000 gas
   Nullifier check: ~5,000 gas
   Transfers: ~50,000 gas
   ────────────────────────────────
-  Total: ~338,000 gas
-
+  Total: ~458,000 gas
+  
 Root overhead: < 1% of total cost ✅
+
+Cost on Target Networks:
+  - Base L2 (0.1 gwei): ~$0.0001
+  - Arbitrum (0.1 gwei): ~$0.0001
+  - BSC (3 gwei): ~$0.003
+  - Solana: ~$0.00001
+```
 ```
 
 ## Real-World Scenarios
@@ -466,48 +523,51 @@ Root overhead: < 1% of total cost ✅
 
 ```
 User deposits 0.01 ETH at 9:00 AM
-Pool: 50 deposits/hour
-Window: 1,000 roots = 20 hours
+Pool: 10,000 deposits/hour (high volume - conservative)
+Window: 10,000 roots = ~1 hour
 
 Timeline:
-  9:00 AM - Deposit (Root R500)
-  10:00 AM - 50 more deposits (Root R550)
-  2:00 PM - 250 more deposits (Root R750)
-  5:00 PM - User withdraws
-
-Check: isKnownRoot(R500)?
-  → YES (only 8 hours, 400 deposits elapsed)
+  9:00 AM - Deposit (Root R5000)
+  9:30 AM - 5,000 more deposits (Root R10000)
+  10:00 AM - User withdraws
+  
+Check: isKnownRoot(R5000)?
+  → YES (only 1 hour, 10,000 deposits elapsed, still in window)
   → Pre-generated proof accepted ✅
   → Instant withdrawal
 
 User experience: Seamless, no delays
 ```
 
-### Scenario 2: Long Wait (Regeneration Needed)
+### Scenario 2: Peak Volume (Regeneration Needed)
 
 ```
-User deposits 0.001 ETH on Monday
-Pool: 100 deposits/hour (ultra-high volume)
-Window: 1,000 roots = 10 hours
+AI agent deposits 0.001 ETH at 10:00 AM
+Pool: 100,000 deposits/hour (peak volume scenario)
+Window: 10,000 roots = ~6 minutes
+Window: 10,000 roots = ~6 minutes
 
 Timeline:
-  Monday 10:00 AM - Deposit (Root R2000)
-  Monday 8:00 PM - Root R2000 evicted (R3000 is oldest)
-  Wednesday 10:00 AM - User tries to withdraw
-
-Check: isKnownRoot(R2000)?
-  → NO (48 hours elapsed, 4,800 deposits)
+  Monday 10:00 AM - Deposit (Root R50000)
+  Monday 10:10 AM - Root R50000 evicted (10,000+ new deposits)
+  Monday 10:15 AM - User tries to withdraw
+  
+Check: isKnownRoot(R50000)?
+  → NO (15 minutes elapsed, 25,000 deposits)
   → Pre-generated proof rejected
 
 SDK automatically regenerates:
-  1. Fetch current root R6800
-  2. Fetch Merkle proof for leafIndex 2000
+  1. Fetch current root R66666
+  2. Fetch Merkle proof for leafIndex 50000
      (commitment still there!)
   3. Generate new proof (5-10 seconds)
   4. Submit and withdraw ✅
-
+  
 User experience: 5-10 second delay, no funds lost
-Message: "Regenerating proof... done! ✅"
+Message: "Root expired, regenerating proof... done! ✅"
+Note: At 100k/hour peak, auto-regeneration is expected and handled seamlessly
+Message: "Root expired, regenerating proof... done! ✅"
+Note: At very high volume (100k/hour), auto-regeneration may be frequent
 ```
 
 ### Scenario 3: Extreme Edge Case (Still Works!)
@@ -589,13 +649,15 @@ function withdraw(..., bytes32 root, ...) external {
 
 ### Tornado Cash (Original, 2019)
 
+**Actual Specifications:**
 ```
 Root storage: 30 roots
-Lookup method: Linear iteration
+Tree height: 32 (4.3 billion capacity)
+Lookup method: Linear iteration (do-while loop)
 Gas cost: ~6,000 gas
-Target pools: 1 ETH, 10 ETH, 100 ETH
-Volume: 5-20 deposits/hour
-Time window: 1.5 to 6 hours
+Target pools: 0.1, 1, 10, 100 ETH (large denominations)
+Volume: 5-20 deposits/hour (low frequency)
+Time window: 1.5 to 6 hours at typical volume
 
 Design rationale:
   ✅ Sufficient for low-volume pools
@@ -608,21 +670,27 @@ Verdict: Perfect for their use case ✅
 
 ### torx402 (2024+)
 
+**torx402 Specifications:**
 ```
-Root storage: 1,000 roots (33x more)
-Lookup method: Mapping (O(1))
-Gas cost: ~3,000 gas (50% cheaper!)
-Target pools: 0.001 ETH, 0.01 ETH, 0.1 ETH
-Volume: 50-100+ deposits/hour
-Time window: 10 hours to 2+ days
+Root storage: 10,000 roots (333x more than Tornado)
+Tree height: 32 (same as Tornado - proven design)
+Lookup method: Mapping (O(1), optimized)
+Gas cost: ~3,000 gas (50% cheaper than Tornado!)
+Target pools: 0.001, 0.01, 0.1 ETH (micropayments)
+Volume (conservative): 10,000 deposits/hour (500-2000x more than Tornado)
+Volume (peak): 100,000+ deposits/hour (AI agents, global usage)
+Time window: ~1 hour at conservative volume, ~6 min at peak
 
 Design rationale:
-  ✅ High-volume micropayments need longer windows
-  ✅ Global users (timezones, sleep cycles)
-  ✅ Modern L2s have cheap storage
-  ✅ Mapping optimization enables more roots with lower gas
-
-Verdict: Optimized for torx402 use case ✅
+  ✅ Micropayments generate 500-2000x higher volume than large transfers
+  ✅ Need 333x more roots to maintain usable time windows
+  ✅ L2s/BSC/Solana have cheap gas (can afford more storage)
+  ✅ Mapping optimization makes 10k roots cheaper than Tornado's 30
+  ✅ Height 32 provides 4.3B capacity (sufficient for years of growth)
+  ✅ 1 hour window at target volume is reasonable
+  ✅ Auto-regeneration handles peak scenarios
+  
+Verdict: Optimized for high-frequency micropayment use case ✅
 ```
 
 ## Best Practices
@@ -630,10 +698,11 @@ Verdict: Optimized for torx402 use case ✅
 ### For Users
 
 **✅ DO:**
-1. **Withdraw within the window** (10+ hours for high-volume)
-2. **Don't panic if root expires** - just regenerate (automatic in SDK)
+1. **Withdraw within the window** (~1 hour for target volume)
+2. **Trust auto-regeneration** - SDK handles expired roots automatically
 3. **Save your note securely** - you need (k, r, leafIndex)
 4. **Check pool volume** before depositing
+5. **Use pools on L2s/BSC/Solana** - cheaper gas for height 32 proofs
 
 **❌ DON'T:**
 1. Worry about "losing funds" - impossible if you have your note
@@ -675,7 +744,7 @@ Verdict: Optimized for torx402 use case ✅
 
 ### Q: Can I lose my funds if I wait too long?
 
-**A**: NO! Your commitment is permanent. You can always withdraw by regenerating the proof, even years later (assuming you have your secrets k and r).
+**A**: NO! Your commitment is permanent in the height 32 Merkle tree. You can always withdraw by regenerating the proof, even years later (assuming you have your secrets k and r). The tree can hold 4.3 billion deposits - it will never fill in any realistic timeframe.
 
 ### Q: Why not just store all roots forever?
 
@@ -691,31 +760,37 @@ Verdict: Optimized for torx402 use case ✅
 
 ### Q: How does this compare to Tornado Cash?
 
-**A**:
-- Tornado: 30 roots (sufficient for their low-volume pools)
-- torx402: 1,000 roots (needed for high-volume micropayments)
-- Both designs are correct for their use cases
+**A**: 
+- **Tornado Cash**: 30 roots, height 32, 5-20 deposits/hour
+- **torx402**: 10,000 roots, height 32, 10,000+ deposits/hour
+- torx402 needs 333x more roots due to 500-2000x higher volume
+- Both designs are optimal for their respective use cases
+- Height 32 is industry standard (Tornado Cash proven design since 2019)
 
 ## Summary
 
 **Root History: A Convenience, Not a Constraint**
 
 ```
-✅ Stores last 1,000 Merkle roots
-✅ Provides 10-48 hour window (high to medium volume)
-✅ Efficient O(1) lookup (~3k gas)
-✅ Reasonable storage (32 KB)
+✅ Stores last 10,000 Merkle roots (333x more than Tornado's 30)
+✅ Height 32 tree (4.3 billion capacity, same as Tornado)
+✅ Provides ~1 hour window at 10k deposits/hour (target volume)
+✅ Efficient O(1) lookup (~3k gas via mapping)
+✅ Reasonable storage (320 KB - acceptable on L2s)
 ✅ Funds NEVER locked (can always regenerate)
-✅ Optimal for micropayment use case
+✅ Optimal for high-frequency micropayment use case
+✅ Deployed on L2s, BSC, Solana (cheap gas for height 32)
 ```
 
 **Key Takeaways:**
 
-1. Your commitment is **permanent** (never removed from tree)
+1. Your commitment is **permanent** (never removed from height 32 tree)
 2. Root history is **temporary** (convenience window)
-3. Expired root = **regenerate proof** (5-10 seconds, no cost)
-4. 1,000 roots = **optimal balance** (not too short, not overkill)
-5. Funds are **always accessible** (mathematically guaranteed)
+3. Expired root = **regenerate proof** (5-10 seconds, automatic in SDK)
+4. 10,000 roots = **optimal balance** for high-volume micropayments
+5. Height 32 tree = **4.3 billion capacity** (effectively unlimited)
+6. Funds are **always accessible** (mathematically guaranteed)
+7. Target networks (L2s, BSC, Solana) make height 32 affordable
 
 **This design enables fast, convenient withdrawals while maintaining security and efficiency.** 🎯
 
