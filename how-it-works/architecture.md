@@ -31,7 +31,7 @@ Current State: 1,247 deposits already in pool
 └─────────────────────────────────────────────────────────────┘
                             ↓          ↑
       Time 0.0s: Deposit ──┘          └── Time 2.0s: Withdraw
-                            
+
 ┌──────────┐                                    ┌──────────┐
 │  Client  │────── < 2 seconds total ─────────→│ Merchant │
 └──────────┘                                    └──────────┘
@@ -49,7 +49,7 @@ Timeline:
   10:00:01.000 - Generate zk-SNARK proof
   10:00:01.500 - Submit withdrawal via relayer
   10:00:02.000 - Payment received by merchant ✅
-  
+
 Total Time: 2 seconds
 Privacy: Your deposit is 1 of 1,247 possibilities
 ```
@@ -145,7 +145,7 @@ WITHDRAWAL/PAYMENT:
 **Responsibilities**:
 - Accept fixed-denomination deposits with commitments
 - Maintain Merkle tree of all deposit commitments
-- Store historical Merkle roots (last 100)
+- Store historical Merkle roots (last 10k)
 - Verify zk-SNARK proofs for withdrawals
 - Prevent double-spending via nullifier hash tracking
 - Execute withdrawals to designated recipients
@@ -158,7 +158,7 @@ mapping(uint256 => bytes32) public commitments;
 uint256 public nextLeafIndex;
 
 // Historical roots for proof flexibility
-bytes32[100] public roots;
+bytes32[10000] public roots;
 uint256 public currentRootIndex;
 
 // Nullifier tracking (prevent double-spend)
@@ -272,7 +272,7 @@ Fee Structure:
   - Client specifies fee in payment request
   - Typical fees: 0.5-2% of withdrawal amount
   - Fee covers gas costs + relayer profit
-  
+
 Revenue Model:
   - Fee per withdrawal transaction
   - Competitive market drives fee discovery
@@ -431,7 +431,7 @@ Each pool maintains a Merkle tree of commitments:
               /  \     /  \   /  \    /  \
              /    \   /    \  \   \  /    \
            C0    C1 C2    C3 C4  C5 C6   C7 ...
-           
+
 Height: 20 (supports 2^20 = ~1M deposits per pool)
 Hash Function: MiMC (zk-SNARK friendly)
 Leaf Values: Commitments C = H1(k||r)
@@ -453,25 +453,25 @@ Layer 1: Zero-Knowledge Proofs (zk-SNARKs)
   - Proves knowledge of (k, r) without revealing them
   - Proves commitment is in Merkle tree
   - Binding to recipient address and fee
-  
+
 Layer 2: Nullifier System
   ↓
   - Prevents double-spending
   - Unlinkable to commitment
   - Deterministic from secret k
-  
+
 Layer 3: Merkle Tree
   ↓
   - Accumulates all deposits
   - Proves membership efficiently
   - Historical roots for timing flexibility
-  
+
 Layer 4: Smart Contract
   ↓
   - Enforces protocol rules
   - Verifies proofs on-chain
   - Manages state transitions
-  
+
 Layer 5: Blockchain
   ↓
   - Immutable settlement
