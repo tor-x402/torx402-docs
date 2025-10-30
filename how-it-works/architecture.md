@@ -22,18 +22,18 @@ Current State: 1,247 deposits already in pool
 
 ┌─────────────────────────────────────────────────────────────┐
 │                    PRIVACY POOL (1,247 deposits)            │
-│  ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐       │
-│  │  │ │  │ │  │ │  │ │  │ │  │ │  │ │  │ │  │ │  │ ...   │
-│  └──┘ └──┘ └──┘ └──┘ └──┘ └──┘ └──┘ └──┘ └──┘ └──┘       │
+│  ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐          │
+│  │  │ │  │ │  │ │  │ │  │ │  │ │  │ │  │ │  │ │  │ ...      │
+│  └──┘ └──┘ └──┘ └──┘ └──┘ └──┘ └──┘ └──┘ └──┘ └──┘          │
 │   ... 1,247 existing deposits ...                           │
-│                         ↓          ↑                         │
-│                    (instant in/out)                          │
+│                         ↓          ↑                        │
+│                    (instant in/out)                         │
 └─────────────────────────────────────────────────────────────┘
                             ↓          ↑
       Time 0.0s: Deposit ──┘          └── Time 2.0s: Withdraw
 
 ┌──────────┐                                    ┌──────────┐
-│  Client  │────── < 2 seconds total ─────────→│ Merchant │
+│  Client  │────── < 2 seconds total ─────────→ │ Merchant │
 └──────────┘                                    └──────────┘
 
 Privacy Achieved:
@@ -145,7 +145,7 @@ WITHDRAWAL/PAYMENT:
 **Responsibilities**:
 - Accept fixed-denomination deposits with commitments
 - Maintain Merkle tree of all deposit commitments
-- Store historical Merkle roots (last 10k)
+- Store historical Merkle roots (last 1k)
 - Verify zk-SNARK proofs for withdrawals
 - Prevent double-spending via nullifier hash tracking
 - Execute withdrawals to designated recipients
@@ -158,7 +158,7 @@ mapping(uint256 => bytes32) public commitments;
 uint256 public nextLeafIndex;
 
 // Historical roots for proof flexibility
-bytes32[10000] public roots;
+bytes32[1000] public roots;
 uint256 public currentRootIndex;
 
 // Nullifier tracking (prevent double-spend)
