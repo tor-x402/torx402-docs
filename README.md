@@ -2,15 +2,15 @@
 description: Privacy-preserving micropayments for the HTTP protocol
 ---
 
-# Welcome to x402tornado
+# Welcome to torx402
 
-<figure><img src=".gitbook/assets/x402tornado-banner.png" alt="x402tornado"><figcaption><p>Privacy-preserving HTTP micropayments powered by zero-knowledge proofs</p></figcaption></figure>
+<figure><img src=".gitbook/assets/torx402-banner.png" alt="torx402"><figcaption><p>Privacy-preserving HTTP micropayments powered by zero-knowledge proofs</p></figcaption></figure>
 
-## What is x402tornado?
+## What is torx402?
 
-**x402tornado** is a privacy-preserving payment protocol that brings **anonymous micropayments** to plain HTTP. By combining the [x402 protocol](https://x402.org) with [Tornado Cash](https://tornado.ws/)'s zero-knowledge privacy technology, x402tornado enables truly private, instant, and low-cost payments for web APIs, digital content, and AI agent commerce.
+**torx402** is a privacy-preserving payment protocol that brings **anonymous micropayments** to plain HTTP. By combining the [x402 protocol](https://x402.org) with [Tornado Cash](https://tornado.ws/)'s zero-knowledge privacy technology, torx402 enables truly private, instant, and low-cost payments for web APIs, digital content, and AI agent commerce.
 
-With x402tornado, **clients can pay for resources without revealing their identity**, and **merchants can receive payments without knowing who paid**—all while maintaining cryptographic proof of payment validity.
+With torx402, **clients can pay for resources without revealing their identity**, and **merchants can receive payments without knowing who paid**—all while maintaining cryptographic proof of payment validity.
 
 ## The Problem
 
@@ -24,7 +24,7 @@ Traditional payment systems and even standard blockchain transactions reveal sen
 
 ## The Solution
 
-x402tornado solves these problems by combining:
+torx402 solves these problems by combining:
 
 ### 🌐 **x402 Protocol** 
 HTTP-native micropayments using the `402 Payment Required` status code
@@ -51,7 +51,7 @@ Anonymous, instant, verifiable payments over HTTP
 
 ✅ **Privacy-First**: Zero-knowledge proofs ensure complete anonymity between deposits and withdrawals
 
-✅ **HTTP-Native**: Works with any HTTP API—no special client requirements beyond x402tornado support
+✅ **HTTP-Native**: Works with any HTTP API—no special client requirements beyond torx402 support
 
 ✅ **Instant Settlement**: Payments settle in <1 second with blockchain finality
 
@@ -70,28 +70,39 @@ Anonymous, instant, verifiable payments over HTTP
 ```mermaid
 sequenceDiagram
     participant Client
+    participant Facilitator
     participant Pool as Privacy Pool
-    participant Server
+    participant Blockchain
+    participant Merchant
     participant Relayer
 
-    Note over Client: Deposit Phase
-    Client->>Pool: Deposit N tokens + commitment
+    Note over Client,Blockchain: Deposit Phase
+    Client->>Facilitator: Deposit request (N tokens)
+    Facilitator->>Pool: deposit(commitment)
+    Pool->>Blockchain: Execute on-chain
+    Blockchain-->>Pool: Confirmed
     Pool-->>Client: Deposit confirmed
     
-    Note over Client: Wait & Mix with other deposits
+    Note over Client,Blockchain: Wait & Mix with other deposits
     
-    Note over Client: Withdrawal Phase
-    Client->>Server: GET /api (no payment)
-    Server-->>Client: 402 Payment Required
+    Note over Client,Blockchain: Withdrawal Phase
+    Client->>Merchant: GET /api (no payment)
+    Merchant-->>Client: 402 Payment Required
     Client->>Client: Generate zk-SNARK proof
     Client->>Relayer: Withdrawal request + proof
-    Relayer->>Pool: Withdraw with proof
-    Pool->>Server: Payment (N - fee) tokens
+    Relayer->>Merchant: GET /api + X-PAYMENT (proof)
+    Merchant->>Facilitator: Verify proof
+    Facilitator-->>Merchant: Valid ✓
+    Merchant->>Facilitator: Settle payment
+    Facilitator->>Pool: withdraw(proof)
+    Pool->>Blockchain: Execute withdrawal
+    Blockchain-->>Pool: Confirmed
+    Pool->>Merchant: Payment (N - fee) tokens
     Pool->>Relayer: Fee payment
-    Relayer-->>Client: 
-    Server-->>Client: 200 OK + Resource
+    Merchant-->>Relayer: 200 OK + Resource
+    Relayer-->>Client: Resource delivered
     
-    Note over Client,Server: Server cannot link payment to client
+    Note over Client,Merchant: Merchant cannot link payment to client
 ```
 
 ### Step-by-Step:
@@ -144,7 +155,7 @@ Ready to integrate privacy-preserving payments into your application?
     </tr>
     <tr>
       <td><strong>Core Concepts</strong></td>
-      <td>Understand how x402tornado works</td>
+      <td>Understand how torx402 works</td>
       <td><a href="core-concepts/privacy-in-micropayments.md">privacy-in-micropayments.md</a></td>
     </tr>
     <tr>
@@ -160,9 +171,9 @@ Ready to integrate privacy-preserving payments into your application?
   </tbody>
 </table>
 
-## Why x402tornado?
+## Why torx402?
 
-| Feature | Traditional Payment | Standard x402 | x402tornado |
+| Feature | Traditional Payment | Standard x402 | torx402 |
 |---------|-------------------|---------------|-------------|
 | **Transaction Speed** | Minutes to days | <1 second | <1 second |
 | **Sender Privacy** | ❌ Exposed | ❌ Exposed | ✅ Anonymous |
@@ -176,15 +187,15 @@ Ready to integrate privacy-preserving payments into your application?
 
 ## Community & Support
 
-- 🌐 **Website**: [https://x402tornado.network](https://x402tornado.network)
-- 💬 **Discord**: [Join our community](https://discord.gg/x402tornado)
-- 🐦 **Twitter**: [@x402tornado](https://twitter.com/x402tornado)
+- 🌐 **Website**: [https://torx402.network](https://torx402.network)
+- 💬 **Discord**: [Join our community](https://discord.gg/torx402)
+- 🐦 **Twitter**: [@torx402](https://twitter.com/torx402)
 - 📖 **Documentation**: You're reading it!
-- 💻 **GitHub**: [github.com/x402tornado](https://github.com/x402tornado)
+- 💻 **GitHub**: [github.com/torx402](https://github.com/torx402)
 
 ## Security & Audits
 
-x402tornado inherits security properties from both x402 and Tornado Cash protocols. Our implementation has been designed with security as the top priority:
+torx402 inherits security properties from both x402 and Tornado Cash protocols. Our implementation has been designed with security as the top priority:
 
 - ✅ Zero-knowledge proof verification
 - ✅ Replay attack prevention
@@ -193,12 +204,12 @@ x402tornado inherits security properties from both x402 and Tornado Cash protoco
 - ✅ 126-bit cryptographic security
 
 {% hint style="info" %}
-**Security Notice**: x402tornado is currently in beta. Smart contracts are undergoing professional security audits. Use at your own risk and only with amounts you can afford to lose.
+**Security Notice**: torx402 is currently in beta. Smart contracts are undergoing professional security audits. Use at your own risk and only with amounts you can afford to lose.
 {% endhint %}
 
 ## License
 
-x402tornado is open-source software licensed under [MIT License](LICENSE).
+torx402 is open-source software licensed under [MIT License](LICENSE).
 
 ## Contributing
 
@@ -217,7 +228,7 @@ Check out our [Contributing Guide](contributing/how-to-contribute.md) to get sta
 <div align="center">
   <p><strong>Built with ❤️ for a more private web</strong></p>
   <p>
-    <a href="introduction/what-is-x402tornado.md">Learn More</a> •
+    <a href="introduction/what-is-torx402.md">Learn More</a> •
     <a href="introduction/quick-start.md">Quick Start</a> •
     <a href="protocol/overview.md">Protocol Spec</a> •
     <a href="resources/api-reference.md">API Docs</a>

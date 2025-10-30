@@ -233,11 +233,11 @@ Result: Competitors replicate, intellectual property lost
 - Institutional advantage
 - Individual powerlessness
 
-## The Solution: x402tornado
+## The Solution: torx402
 
 ### Privacy by Design
 
-x402tornado provides **cryptographic privacy guarantees**:
+torx402 provides **cryptographic privacy guarantees**:
 
 ✅ **Deposit-Withdrawal Unlinkability**: No link between deposit and payment  
 ✅ **Sender Anonymity**: Merchant doesn't know who paid  
@@ -342,7 +342,7 @@ Harmful transparency:
 
 **Reality**: Privacy and compliance are compatible.
 
-x402tornado enables:
+torx402 enables:
 - Regulatory compliance through optional disclosure
 - Privacy for law-abiding users
 - Accountability without surveillance
@@ -372,7 +372,7 @@ x402tornado enables:
 
 ### The Path Forward
 
-x402tornado represents a **fundamental shift** in how we think about payments:
+torx402 represents a **fundamental shift** in how we think about payments:
 
 From: **Surveillance by Default**  
 To: **Privacy by Design**
@@ -390,11 +390,11 @@ To: **Collective Anonymity**
 1. **Demand Privacy**: Choose privacy-preserving services
 2. **Support Development**: Contribute to privacy projects
 3. **Educate Others**: Spread privacy awareness
-4. **Use Privacy Tools**: Integrate x402tornado
+4. **Use Privacy Tools**: Integrate torx402
 
 ### For Developers
 
-1. **Build Privacy In**: Use x402tornado in your applications
+1. **Build Privacy In**: Use torx402 in your applications
 2. **Default to Privacy**: Make privacy the easy choice
 3. **Educate Users**: Explain privacy benefits
 4. **Contribute Code**: Help build privacy infrastructure
@@ -416,9 +416,9 @@ Privacy in digital payments is not optional—it's essential for:
 - **Healthy digital economy**
 - **Democratic society**
 
-x402tornado makes privacy practical, scalable, and HTTP-native. The question is not whether we need payment privacy, but how quickly we can adopt it.
+torx402 makes privacy practical, scalable, and HTTP-native. The question is not whether we need payment privacy, but how quickly we can adopt it.
 
-**The future of digital commerce is private. Build it with x402tornado.**
+**The future of digital commerce is private. Build it with torx402.**
 
 ---
 

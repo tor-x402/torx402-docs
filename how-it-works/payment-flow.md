@@ -1,12 +1,12 @@
 ---
-description: Complete payment flow in x402tornado from deposit to resource delivery
+description: Complete payment flow in torx402 from deposit to resource delivery
 ---
 
 # Payment Flow
 
 ## Overview
 
-The x402tornado payment flow combines privacy-preserving deposits with HTTP-native micropayments. This page details the complete flow from initial deposit through anonymous payment and resource delivery.
+The torx402 payment flow combines privacy-preserving deposits with HTTP-native micropayments. This page details the complete flow from initial deposit through anonymous payment and resource delivery.
 
 ## Complete Payment Flow Diagram
 

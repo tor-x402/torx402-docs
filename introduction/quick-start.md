@@ -1,10 +1,10 @@
 ---
-description: Get started with x402tornado in 5 minutes
+description: Get started with torx402 in 5 minutes
 ---
 
 # Quick Start
 
-This guide will help you make your first anonymous payment using x402tornado in just a few minutes.
+This guide will help you make your first anonymous payment using torx402 in just a few minutes.
 
 ## What You'll Learn
 
@@ -28,17 +28,17 @@ Before you begin, make sure you have:
 ### Installation
 
 ```bash
-npm install x402tornado-client
+npm install torx402-client
 # or
-pnpm add x402tornado-client
+pnpm add torx402-client
 # or
-yarn add x402tornado-client
+yarn add torx402-client
 ```
 
 ### Step 1: Initialize Client
 
 ```typescript
-import { TornadoClient } from 'x402tornado-client';
+import { TornadoClient } from 'torx402-client';
 
 const client = new TornadoClient({
   network: 'base-sepolia',
@@ -86,7 +86,7 @@ if (poolInfo.totalDeposits < 50) {
 const response = await client.payAnonymously({
   resourceUrl: 'https://api.example.com/premium-data',
   note: deposit.note, // Or a previously saved note
-  relayerUrl: 'https://relayer.x402tornado.network',
+  relayerUrl: 'https://relayer.torx402.network',
 });
 
 console.log('Payment successful!');
@@ -96,7 +96,7 @@ console.log('Resource:', response.data);
 ### Complete Example
 
 ```typescript
-import { TornadoClient } from 'x402tornado-client';
+import { TornadoClient } from 'torx402-client';
 
 async function main() {
   // Initialize
@@ -125,7 +125,7 @@ async function main() {
   const data = await client.payAnonymously({
     resourceUrl: 'https://api.example.com/premium-data',
     note: deposit.note,
-    relayerUrl: 'https://relayer.x402tornado.network',
+    relayerUrl: 'https://relayer.torx402.network',
   });
   
   console.log('✅ Payment successful');
@@ -142,13 +142,13 @@ main().catch(console.error);
 ### Installation
 
 ```bash
-pip install x402tornado
+pip install torx402
 ```
 
 ### Step 1: Initialize Client
 
 ```python
-from x402tornado import TornadoClient
+from torx402 import TornadoClient
 import os
 
 client = TornadoClient(
@@ -196,7 +196,7 @@ if pool_info.total_deposits < 50:
 response = client.pay_anonymously(
     resource_url='https://api.example.com/premium-data',
     note=deposit.note,  # Or a previously saved note
-    relayer_url='https://relayer.x402tornado.network',
+    relayer_url='https://relayer.torx402.network',
 )
 
 print('Payment successful!')
@@ -206,7 +206,7 @@ print('Resource:', response.data)
 ### Complete Example
 
 ```python
-from x402tornado import TornadoClient
+from torx402 import TornadoClient
 import os
 
 def main():
@@ -236,7 +236,7 @@ def main():
     data = client.pay_anonymously(
         resource_url='https://api.example.com/premium-data',
         note=deposit.note,
-        relayer_url='https://relayer.x402tornado.network',
+        relayer_url='https://relayer.torx402.network',
     )
     
     print('✅ Payment successful')
@@ -248,6 +248,118 @@ if __name__ == '__main__':
 
 </tab>
 </tabs>
+
+## Instant Withdrawal: The High-Volume Pool Advantage
+
+**Can you withdraw in under 2 seconds?** YES! If the pool already has a large anonymity set.
+
+<tabs>
+<tab title="TypeScript">
+
+```typescript
+// INSTANT WITHDRAWAL EXAMPLE
+// Works when pool already has 500+ deposits
+
+const client = new TornadoClient({
+  network: 'base',
+  rpcUrl: 'https://base.org',
+  privateKey: process.env.PRIVATE_KEY,
+});
+
+// Step 1: Check pool size FIRST
+const poolInfo = await client.getPoolInfo('0.001', 'ETH');
+
+console.log(`Pool size: ${poolInfo.totalDeposits}`);
+// Output: Pool size: 1,247
+
+if (poolInfo.totalDeposits >= 500) {
+  console.log('✅ INSTANT withdrawal possible!');
+  
+  // Step 2: Deposit
+  const startTime = Date.now();
+  const deposit = await client.deposit({
+    denomination: '0.001',
+    asset: 'ETH',
+  });
+  
+  // Step 3: Withdraw IMMEDIATELY (no waiting!)
+  const data = await client.payAnonymously({
+    resourceUrl: 'https://api.example.com/data',
+    note: deposit.note,
+    relayerUrl: 'https://relayer.torx402.network',
+  });
+  
+  const elapsed = Date.now() - startTime;
+  console.log(`✅ Payment complete in ${elapsed}ms`);
+  console.log(`🎭 Privacy: 1 of ${poolInfo.totalDeposits} (${(100/poolInfo.totalDeposits).toFixed(3)}% identifiable)`);
+  // Output: Privacy: 1 of 1,247 (0.080% identifiable)
+}
+```
+
+</tab>
+
+<tab title="Python">
+
+```python
+# INSTANT WITHDRAWAL EXAMPLE
+# Works when pool already has 500+ deposits
+
+from torx402 import TornadoClient
+import time
+
+client = TornadoClient(
+    network='base',
+    rpc_url='https://base.org',
+    private_key=os.getenv('PRIVATE_KEY'),
+)
+
+# Step 1: Check pool size FIRST
+pool_info = client.get_pool_info('0.001', 'ETH')
+
+print(f'Pool size: {pool_info.total_deposits}')
+# Output: Pool size: 1,247
+
+if pool_info.total_deposits >= 500:
+    print('✅ INSTANT withdrawal possible!')
+    
+    # Step 2: Deposit
+    start_time = time.time()
+    deposit = client.deposit(
+        denomination='0.001',
+        asset='ETH',
+    )
+    
+    # Step 3: Withdraw IMMEDIATELY (no waiting!)
+    data = client.pay_anonymously(
+        resource_url='https://api.example.com/data',
+        note=deposit.note,
+        relayer_url='https://relayer.torx402.network',
+    )
+    
+    elapsed = (time.time() - start_time) * 1000
+    print(f'✅ Payment complete in {elapsed:.0f}ms')
+    print(f'🎭 Privacy: 1 of {pool_info.total_deposits} ({100/pool_info.total_deposits:.3f}% identifiable)')
+    # Output: Privacy: 1 of 1,247 (0.080% identifiable)
+```
+
+</tab>
+</tabs>
+
+**Why This Works:**
+- Pool already has 1,247 deposits (massive anonymity set)
+- No waiting needed - privacy exists immediately
+- Your deposit instantly lost in crowd
+- Perfect for time-sensitive AI agent payments
+
+**When Is Instant Withdrawal Possible?**
+
+| Pool Size | Can Withdraw Instantly? | Privacy Level |
+|-----------|------------------------|---------------|
+| < 50 | ❌ No - wait for growth | Too risky |
+| 50-100 | ⚠️ Acceptable - but wait recommended | Weak |
+| 100-250 | ✅ Yes - good enough | Good |
+| 250-500 | ✅ Yes - strong privacy | Strong |
+| **500+** | ✅ **YES - EXCELLENT** ⚡ | **Excellent** |
 
 ## Understanding Your Note
 
@@ -278,7 +390,7 @@ We provide a demo merchant for testing:
 
 ```bash
 # Test endpoint that requires 0.001 ETH payment
-curl https://demo.x402tornado.network/api/echo
+curl https://demo.torx402.network/api/echo
 
 # Response: 402 Payment Required
 ```
@@ -300,9 +412,9 @@ await new Promise(resolve => setTimeout(resolve, 60000)); // 1 minute
 
 // Test payment
 const response = await client.payAnonymously({
-  resourceUrl: 'https://demo.x402tornado.network/api/echo',
+  resourceUrl: 'https://demo.torx402.network/api/echo',
   note: deposit.note,
-  relayerUrl: 'https://relayer.x402tornado.network',
+  relayerUrl: 'https://relayer.torx402.network',
 });
 
 console.log('Echo response:', response.data);
@@ -327,9 +439,9 @@ time.sleep(60)  # 1 minute
 
 # Test payment
 response = client.pay_anonymously(
-    resource_url='https://demo.x402tornado.network/api/echo',
+    resource_url='https://demo.torx402.network/api/echo',
     note=deposit.note,
-    relayer_url='https://relayer.x402tornado.network',
+    relayer_url='https://relayer.torx402.network',
 )
 
 print('Echo response:', response.data)
@@ -348,13 +460,13 @@ Want to accept anonymous payments in your API?
 
 ```typescript
 import express from 'express';
-import { tornadoMiddleware } from 'x402tornado-express';
+import { tornadoMiddleware } from 'torx402-express';
 
 const app = express();
 
 app.use(
   tornadoMiddleware({
-    facilitatorUrl: 'https://facilitator.x402tornado.network',
+    facilitatorUrl: 'https://facilitator.torx402.network',
     payTo: '0xYourAddress',
     routes: {
       '/premium-data': {
@@ -382,13 +494,13 @@ app.listen(3000);
 
 ```python
 from fastapi import FastAPI
-from x402tornado.fastapi import tornado_middleware
+from torx402.fastapi import tornado_middleware
 
 app = FastAPI()
 
 app.middleware("http")(
     tornado_middleware(
-        facilitator_url='https://facilitator.x402tornado.network',
+        facilitator_url='https://facilitator.torx402.network',
         pay_to_address='0xYourAddress',
         path='/premium-data',
         denomination='0.1',
@@ -482,7 +594,7 @@ Now that you've completed the quick start:
   <tbody>
     <tr>
       <td><strong>Understand Privacy</strong></td>
-      <td>Learn how x402tornado protects your privacy</td>
+      <td>Learn how torx402 protects your privacy</td>
       <td><a href="../core-concepts/privacy-in-micropayments.md">privacy-in-micropayments.md</a></td>
     </tr>
     <tr>
@@ -505,10 +617,10 @@ Now that you've completed the quick start:
 
 ## Get Help
 
-- 💬 **Discord**: [Join our community](https://discord.gg/x402tornado)
+- 💬 **Discord**: [Join our community](https://discord.gg/torx402)
 - 📖 **Docs**: Browse the full documentation
-- 🐛 **GitHub**: [Report issues](https://github.com/x402tornado/x402tornado/issues)
-- 🐦 **Twitter**: [@x402tornado](https://twitter.com/x402tornado)
+- 🐛 **GitHub**: [Report issues](https://github.com/torx402/torx402/issues)
+- 🐦 **Twitter**: [@torx402](https://twitter.com/torx402)
 
 ---
 

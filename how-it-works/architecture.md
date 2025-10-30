@@ -1,20 +1,76 @@
 ---
-description: Understanding the x402tornado system architecture and components
+description: Understanding the torx402 system architecture and components
 ---
 
 # Architecture Overview
 
 ## Introduction
 
-x402tornado's architecture combines two proven protocols—x402 for HTTP-native micropayments and Tornado Cash for zero-knowledge privacy—into a unified system that enables anonymous, verifiable payments over standard HTTP infrastructure.
+torx402's architecture combines two proven protocols—x402 for HTTP-native micropayments and Tornado Cash for zero-knowledge privacy—into a unified system that enables anonymous, verifiable payments over standard HTTP infrastructure.
 
 This page provides a comprehensive overview of the system architecture, core components, and how they interact to provide privacy-preserving micropayments.
+
+## Instant Withdrawal: The High-Volume Advantage
+
+**Can you withdraw in under 2 seconds?** YES! When pools have large existing anonymity sets.
+
+```
+⚡ INSTANT WITHDRAWAL SCENARIO (< 2 seconds)
+
+Ultra-High Volume Pool: 0.001 ETH on Base
+Current State: 1,247 deposits already in pool
+
+┌─────────────────────────────────────────────────────────────┐
+│                    PRIVACY POOL (1,247 deposits)            │
+│  ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐       │
+│  │  │ │  │ │  │ │  │ │  │ │  │ │  │ │  │ │  │ │  │ ...   │
+│  └──┘ └──┘ └──┘ └──┘ └──┘ └──┘ └──┘ └──┘ └──┘ └──┘       │
+│   ... 1,247 existing deposits ...                           │
+│                         ↓          ↑                         │
+│                    (instant in/out)                          │
+└─────────────────────────────────────────────────────────────┘
+                            ↓          ↑
+      Time 0.0s: Deposit ──┘          └── Time 2.0s: Withdraw
+                            
+┌──────────┐                                    ┌──────────┐
+│  Client  │────── < 2 seconds total ─────────→│ Merchant │
+└──────────┘                                    └──────────┘
+
+Privacy Achieved:
+  ✅ Anonymity Set: 1,247 (EXCELLENT)
+  ✅ Identification Probability: 0.08%
+  ✅ No waiting needed
+  ✅ Perfect for real-time AI agent payments
+  ✅ Time-sensitive transactions enabled
+
+Timeline:
+  10:00:00.000 - Client deposits to pool
+  10:00:00.500 - Deposit confirmed on-chain
+  10:00:01.000 - Generate zk-SNARK proof
+  10:00:01.500 - Submit withdrawal via relayer
+  10:00:02.000 - Payment received by merchant ✅
+  
+Total Time: 2 seconds
+Privacy: Your deposit is 1 of 1,247 possibilities
+```
+
+**Key Insight:** You don't wait for OTHER people to deposit - you benefit from deposits that ALREADY HAPPENED. High-volume pools with 500+ existing deposits enable instant privacy!
+
+### Privacy Timeline Comparison
+
+| Pool Volume | Current Size | Your Wait Time | Use Case |
+|-------------|--------------|----------------|----------|
+| **🚀 Ultra-High** | **1,247** | **< 2 seconds** ⚡ | Instant AI payments |
+| **⚡ Very High** | 500 | < 2 seconds | Real-time transactions |
+| **✅ High** | 100-250 | Minutes | Popular pools |
+| **⏰ Medium** | 50-100 | 1-2 hours | Standard usage |
+| **😴 Low** | 10-50 | Days | Avoid if possible |
 
 ## High-Level Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        x402tornado Ecosystem                         │
+│                        torx402 Ecosystem                         │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
 │  ┌──────────┐         ┌──────────────┐         ┌──────────┐       │
@@ -143,10 +199,10 @@ AFTER WITHDRAWAL:
 - Log transactions for accounting (without revealing payer identity)
 
 **Integration Points**:
-- Express middleware (`x402tornado-express`)
-- FastAPI middleware (`x402tornado-fastapi`)
-- Flask middleware (`x402tornado-flask`)
-- Hono middleware (`x402tornado-hono`)
+- Express middleware (`torx402-express`)
+- FastAPI middleware (`torx402-fastapi`)
+- Flask middleware (`torx402-flask`)
+- Hono middleware (`torx402-hono`)
 
 **Payment Flow**:
 ```
@@ -331,7 +387,7 @@ Solana:
 
 ### Denomination-Based Pools
 
-x402tornado uses **fixed-denomination pools** to maximize anonymity sets:
+torx402 uses **fixed-denomination pools** to maximize anonymity sets:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐

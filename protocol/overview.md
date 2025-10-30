@@ -1,14 +1,14 @@
 ---
-description: Technical specification of the x402tornado protocol
+description: Technical specification of the torx402 protocol
 ---
 
 # Protocol Overview
 
 ## Introduction
 
-x402tornado is a privacy-preserving HTTP micropayment protocol that extends the [x402 specification](https://x402.org) with zero-knowledge proof technology from Tornado Cash. It enables anonymous, verifiable payments for web resources while maintaining HTTP-native integration and sub-second settlement times.
+torx402 is a privacy-preserving HTTP micropayment protocol that extends the [x402 specification](https://x402.org) with zero-knowledge proof technology from Tornado Cash. It enables anonymous, verifiable payments for web resources while maintaining HTTP-native integration and sub-second settlement times.
 
-This document provides the technical specification for the x402tornado protocol, including data structures, cryptographic primitives, and implementation requirements.
+This document provides the technical specification for the torx402 protocol, including data structures, cryptographic primitives, and implementation requirements.
 
 ## Protocol Version
 
@@ -27,7 +27,7 @@ This document provides the technical specification for the x402tornado protocol,
 
 ## Protocol Extensions to x402
 
-x402tornado extends the standard x402 protocol with the following additions:
+torx402 extends the standard x402 protocol with the following additions:
 
 ### New Payment Scheme: `tornado`
 
@@ -49,7 +49,7 @@ Payment proofs use zk-SNARKs instead of direct signatures, enabling anonymity.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    x402tornado Protocol Flow                     │
+│                    torx402 Protocol Flow                     │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  Phase 1: DEPOSIT (Privacy Pool Setup)                          │
@@ -87,7 +87,7 @@ Payment proofs use zk-SNARKs instead of direct signatures, enabling anonymity.
 
 ## HTTP Status Codes
 
-x402tornado uses the same HTTP status codes as standard x402:
+torx402 uses the same HTTP status codes as standard x402:
 
 | Code | Meaning | Usage |
 |------|---------|-------|

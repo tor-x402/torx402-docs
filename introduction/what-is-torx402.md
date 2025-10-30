@@ -1,14 +1,14 @@
 ---
-description: Understanding x402tornado and privacy-preserving HTTP micropayments
+description: Understanding torx402 and privacy-preserving HTTP micropayments
 ---
 
-# What is x402tornado?
+# What is torx402?
 
 ## Overview
 
-**x402tornado** is a privacy-preserving payment protocol that combines the HTTP-native micropayment capabilities of [x402](https://x402.org) with the zero-knowledge privacy technology from [Tornado Cash](https://tornado.ws/). It enables **anonymous, instant, and verifiable payments** for web APIs, digital content, and autonomous agent commerce.
+**torx402** is a privacy-preserving payment protocol that combines the HTTP-native micropayment capabilities of [x402](https://x402.org) with the zero-knowledge privacy technology from [Tornado Cash](https://tornado.ws/). It enables **anonymous, instant, and verifiable payments** for web APIs, digital content, and autonomous agent commerce.
 
-In simple terms: x402tornado lets you pay for things on the internet without revealing who you are, while cryptographically proving that payment was made.
+In simple terms: torx402 lets you pay for things on the internet without revealing who you are, while cryptographically proving that payment was made.
 
 ## The Genesis: Two Powerful Protocols
 
@@ -43,9 +43,9 @@ Tornado Cash pioneered privacy-preserving transactions on Ethereum using zero-kn
 - Micropayment optimization
 - API monetization features
 
-### x402tornado: The Best of Both Worlds
+### torx402: The Best of Both Worlds
 
-x402tornado merges these protocols to create a **privacy-preserving HTTP micropayment system** that provides:
+torx402 merges these protocols to create a **privacy-preserving HTTP micropayment system** that provides:
 
 ✅ HTTP-native integration from x402  
 ✅ Zero-knowledge privacy from Tornado  
@@ -53,7 +53,7 @@ x402tornado merges these protocols to create a **privacy-preserving HTTP micropa
 ✅ Verifiable payments without identity exposure  
 ✅ Agent-ready commerce infrastructure  
 
-## How x402tornado Works (High Level)
+## How torx402 Works (High Level)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -112,7 +112,7 @@ Every blockchain transaction is public and permanent. This creates serious priva
 
 ### The Solution: Privacy-Preserving Payments
 
-x402tornado ensures that:
+torx402 ensures that:
 
 ✅ **Merchants get paid** without knowing who paid them  
 ✅ **Clients pay anonymously** while proving payment validity  
@@ -120,7 +120,7 @@ x402tornado ensures that:
 ✅ **Transaction amounts are private** within denomination pools  
 ✅ **No linkable metadata** connects payments to identities  
 
-## Who is x402tornado For?
+## Who is torx402 For?
 
 ### 🤖 AI Agent Developers
 
@@ -166,7 +166,7 @@ Monetize content with:
 
 ### vs. Traditional Payments (Credit Cards, PayPal)
 
-| Feature | Traditional | x402tornado |
+| Feature | Traditional | torx402 |
 |---------|------------|-------------|
 | Transaction Speed | Minutes-Days | <1 second |
 | Fees | 2-3% + fixed | ~0.1% network |
@@ -177,7 +177,7 @@ Monetize content with:
 
 ### vs. Standard Cryptocurrency Payments
 
-| Feature | Standard Crypto | x402tornado |
+| Feature | Standard Crypto | torx402 |
 |---------|----------------|-------------|
 | Privacy | Pseudonymous | Anonymous |
 | HTTP Integration | Complex | Native |
@@ -187,7 +187,7 @@ Monetize content with:
 
 ### vs. Standard x402 Protocol
 
-| Feature | x402 | x402tornado |
+| Feature | x402 | torx402 |
 |---------|------|-------------|
 | Payment Privacy | None | Complete |
 | Sender Anonymity | Exposed | Protected |
@@ -197,13 +197,13 @@ Monetize content with:
 
 ## Architecture Principles
 
-x402tornado is built on these core principles:
+torx402 is built on these core principles:
 
 ### 🔐 Privacy by Design
 Privacy is not an add-on—it's fundamental to the protocol architecture. Zero-knowledge proofs ensure privacy at the cryptographic level.
 
 ### 🌐 HTTP-Native
-Works with standard HTTP infrastructure. No custom protocols, no special requirements beyond x402tornado support.
+Works with standard HTTP infrastructure. No custom protocols, no special requirements beyond torx402 support.
 
 ### 🚀 Performance-First
 Sub-second settlement times make micropayments practical. Optimized circuits keep proof generation fast.
@@ -236,7 +236,7 @@ AI applications query expensive LLM APIs anonymously, preventing model providers
 
 ## Technical Foundations
 
-x402tornado builds on proven cryptographic primitives:
+torx402 builds on proven cryptographic primitives:
 
 - **zk-SNARKs (Groth16)**: Zero-knowledge proof system for privacy
 - **Pedersen Hash**: Commitment scheme for nullifiers
@@ -272,7 +272,7 @@ Ready to integrate privacy-preserving payments?
     </tr>
     <tr>
       <td><strong>Key Features</strong></td>
-      <td>Explore x402tornado's capabilities</td>
+      <td>Explore torx402's capabilities</td>
       <td><a href="key-features.md">key-features.md</a></td>
     </tr>
     <tr>
