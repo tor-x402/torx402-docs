@@ -4,7 +4,7 @@ description: Privacy-preserving micropayments for the HTTP protocol
 
 # Welcome to torx402
 
-<figure><img src=".gitbook/assets/torx402-banner.png" alt="torx402"><figcaption><p>Privacy-preserving HTTP micropayments powered by zero-knowledge proofs</p></figcaption></figure>
+<figure><img src="images/torx402-banner.png" alt="torx402"><figcaption><p>Privacy-preserving HTTP micropayments powered by zero-knowledge proofs</p></figcaption></figure>
 
 ## What is torx402?
 
@@ -26,7 +26,7 @@ Traditional payment systems and even standard blockchain transactions reveal sen
 
 torx402 solves these problems by combining:
 
-### 🌐 **x402 Protocol** 
+### 🌐 **x402 Protocol**
 HTTP-native micropayments using the `402 Payment Required` status code
 - Pay-per-request pricing
 - No accounts or API keys required
@@ -82,9 +82,9 @@ sequenceDiagram
     Pool->>Blockchain: Execute on-chain
     Blockchain-->>Pool: Confirmed
     Pool-->>Client: Deposit confirmed
-    
+
     Note over Client,Blockchain: Wait & Mix with other deposits
-    
+
     Note over Client,Blockchain: Withdrawal Phase
     Client->>Merchant: GET /api (no payment)
     Merchant-->>Client: 402 Payment Required
@@ -101,7 +101,7 @@ sequenceDiagram
     Pool->>Relayer: Fee payment
     Merchant-->>Relayer: 200 OK + Resource
     Relayer-->>Client: Resource delivered
-    
+
     Note over Client,Merchant: Merchant cannot link payment to client
 ```
 
@@ -110,7 +110,7 @@ sequenceDiagram
 1. **Deposit**: Client deposits fixed amount (e.g., 0.1 ETH) into a privacy pool with a secret commitment
 2. **Mix**: Deposit mixes with other users' deposits in the anonymity set
 3. **Request**: Client requests a protected resource from a merchant server
-4. **Payment Required**: Server responds with `402 Payment Required` 
+4. **Payment Required**: Server responds with `402 Payment Required`
 5. **Proof Generation**: Client generates a zero-knowledge proof of deposit ownership
 6. **Anonymous Withdrawal**: Client (via relayer) withdraws payment to merchant without revealing which deposit
 7. **Verification**: Merchant verifies the proof and receives payment
