@@ -4,7 +4,7 @@ description: Privacy-preserving micropayments for the HTTP protocol
 
 # Welcome to torx402
 
-<figure><img src="./images/torx402-banner.png" alt="torx402"><figcaption><p>Privacy-preserving HTTP micropayments powered by zero-knowledge proofs</p></figcaption></figure>
+<figure><img src="images/torx402-banner.png" alt="torx402"><figcaption><p>Privacy-preserving HTTP micropayments powered by zero-knowledge proofs</p></figcaption></figure>
 
 ## What is torx402?
 
